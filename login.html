@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تسجيل الدخول | أوتو فلو</title>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --primary:#6c63ff;--primary-dark:#4b44cc;--secondary:#00d4aa;
+      --accent:#ff6584;--bg:#0a0a14;--surface:#12121f;--surface2:#1a1a2e;
+      --text:#e8e8f0;--text-muted:#8888aa;--border:rgba(108,99,255,0.15);
+      --glow:rgba(108,99,255,0.3);--font:'Segoe UI',system-ui,sans-serif;--radius:16px;--radius-sm:8px;
+    }
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    .orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.25;pointer-events:none;}
+    .orb-1{width:500px;height:500px;background:var(--primary);top:-150px;right:-100px;}
+    .orb-2{width:350px;height:350px;background:var(--secondary);bottom:-100px;left:-50px;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:48px 40px;width:100%;max-width:440px;position:relative;z-index:1;box-shadow:0 24px 80px rgba(0,0,0,.4);}
+    .logo{font-size:24px;font-weight:900;text-decoration:none;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;margin-bottom:32px;}
+    h1{font-size:26px;font-weight:900;margin-bottom:8px;letter-spacing:-.5px;}
+    .subtitle{font-size:14px;color:var(--text-muted);margin-bottom:32px;}
+    .subtitle a{color:var(--primary);text-decoration:none;font-weight:700;}
+    .form-group{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+    label{font-size:13px;font-weight:700;color:var(--text-muted);}
+    input{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 16px;color:var(--text);font-size:14px;font-family:var(--font);outline:none;transition:border-color .2s;width:100%;}
+    input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,99,255,.12);}
+    .forgot{text-align:left;margin-top:-10px;margin-bottom:18px;}
+    .forgot a{font-size:13px;color:var(--text-muted);text-decoration:none;transition:color .2s;}
+    .forgot a:hover{color:var(--primary);}
+    .btn{width:100%;padding:14px;border-radius:999px;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:all .25s;font-family:var(--font);}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 4px 20px var(--glow);}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px var(--glow);}
+    .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+    .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-muted);font-size:12px;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+    .btn-google{background:var(--surface2);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:999px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .2s;width:100%;}
+    .btn-google:hover{border-color:rgba(108,99,255,.4);background:rgba(108,99,255,.06);}
+    .error-box{background:rgba(255,101,132,.1);border:1px solid rgba(255,101,132,.3);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#ff6584;margin-bottom:18px;display:none;}
+    .success-box{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:var(--secondary);margin-bottom:18px;display:none;}
+    @media(max-width:480px){.card{padding:32px 24px;margin:16px;}}
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="card">
+    <a href="index.html" class="logo">⚡ أوتو فلو</a>
+    <h1>أهلاً بعودتك</h1>
+    <p class="subtitle">ليس لديك حساب؟ <a href="signup.html">سجّل مجاناً</a></p>
+
+    <div class="error-box" id="errorBox"></div>
+    <div class="success-box" id="successBox"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">البريد الإلكتروني</label>
+        <input type="email" id="email" name="email" placeholder="name@company.com" required autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password"/>
+      </div>
+      <div class="forgot"><a href="#" id="forgotLink">نسيت كلمة المرور؟</a></div>
+      <button type="submit" class="btn btn-primary" id="loginBtn">تسجيل الدخول</button>
+    </form>
+
+    <div class="divider">أو</div>
+    <button class="btn-google" id="googleBtn">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      المتابعة بـ Google
+    </button>
+  </div>
+
+  <script src="js/supabase-config.js"></script>
+  <script>
+    redirectIfLoggedIn();
+
+    const errorBox   = document.getElementById('errorBox');
+    const successBox = document.getElementById('successBox');
+
+    function showError(msg){ errorBox.textContent = msg; errorBox.style.display='block'; successBox.style.display='none'; }
+    function showSuccess(msg){ successBox.textContent = msg; successBox.style.display='block'; errorBox.style.display='none'; }
+
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      btn.textContent = '⏳ جاري الدخول...'; btn.disabled = true;
+      try {
+        await auth.login(
+          document.getElementById('email').value,
+          document.getElementById('password').value
+        );
+        window.location.href = 'dashboard.html';
+      } catch(err) {
+        showError(err.message || 'بيانات خاطئة، حاول مجدداً');
+        btn.textContent = 'تسجيل الدخول'; btn.disabled = false;
+      }
+    });
+
+    document.getElementById('googleBtn').addEventListener('click', () => {
+      showError('تسجيل الدخول بـ Google سيكون متاحاً قريباً — استخدم البريد الإلكتروني الآن');
+    });
+
+    document.getElementById('forgotLink').addEventListener('click', async e => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      if (!email) { showError('أدخل بريدك الإلكتروني أولاً'); return; }
+      try {
+        await auth.requestPasswordRecovery(email);
+        showSuccess('✅ تم إرسال رابط إعادة تعيين كلمة المرور لبريدك الإلكتروني');
+      } catch(err) {
+        showError(err.message || 'فشل الإرسال');
+      }
+    });
+  </script>
+</body>
+</html>

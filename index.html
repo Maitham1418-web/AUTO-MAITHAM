@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>أوتو فلو | حلول الأتمتة الذكية</title>
+
+  <!-- ═══ Plausible Analytics (مجاني، بدون حساب للبداية) ═══ -->
+  <script defer data-domain="jawala.store" src="https://plausible.io/js/script.js"></script>
+  <style>
+    /* ─── Reset & Variables ─── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #6c63ff;
+      --primary-dark: #4b44cc;
+      --secondary: #00d4aa;
+      --accent: #ff6584;
+      --bg: #0a0a14;
+      --surface: #12121f;
+      --surface2: #1a1a2e;
+      --text: #e8e8f0;
+      --text-muted: #8888aa;
+      --border: rgba(108,99,255,0.15);
+      --glow: rgba(108,99,255,0.3);
+      --font: 'Segoe UI', system-ui, sans-serif;
+      --radius: 16px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ─── Noise Texture Overlay ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+    /* ─── Utility ─── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.25);
+      color: var(--primary); padding: 6px 16px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px;
+    }
+    .badge-dot { width: 7px; height: 7px; background: var(--secondary); border-radius: 50%; animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px;
+      border-radius: 999px; font-size: 15px; font-weight: 700; cursor: pointer;
+      text-decoration: none; transition: all .25s ease; border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 4px 24px var(--glow);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--glow); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+    .btn-icon { font-size: 18px; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 20px 0;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,20,0.7);
+      border-bottom: 1px solid var(--border);
+      transition: all .3s;
+    }
+    nav.scrolled { padding: 14px 0; }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-size: 22px; font-weight: 900; text-decoration: none;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .nav-links { display: flex; gap: 8px; list-style: none; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; padding: 8px 14px;
+      border-radius: var(--radius-sm); font-size: 14px; font-weight: 500;
+      transition: all .2s;
+    }
+    .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-cta { display: flex; gap: 10px; align-items: center; }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 120px 0 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: 0.35;
+    }
+    .orb-1 { width: 600px; height: 600px; background: var(--primary); top: -150px; right: -100px; animation: float 8s ease-in-out infinite; }
+    .orb-2 { width: 400px; height: 400px; background: var(--secondary); bottom: -100px; left: -50px; animation: float 10s ease-in-out infinite reverse; }
+    .orb-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 40%; animation: float 6s ease-in-out infinite 2s; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-30px)} }
+
+    .hero-content { position: relative; z-index: 1; text-align: center; max-width: 800px; margin: 0 auto; }
+    .hero-title {
+      font-size: clamp(40px, 7vw, 80px); font-weight: 900; line-height: 1.1;
+      margin-bottom: 24px; letter-spacing: -2px;
+    }
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-desc { font-size: 18px; color: var(--text-muted); max-width: 560px; margin: 0 auto 40px; }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-stats {
+      display: flex; gap: 48px; justify-content: center; margin-top: 72px;
+      padding-top: 40px; border-top: 1px solid var(--border);
+    }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 36px; font-weight: 900; background: linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Floating cards in hero */
+    .hero-visual {
+      margin-top: 64px; position: relative; z-index: 1;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 700px; margin: 64px auto 0;
+    }
+    .flow-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      display: flex; align-items: center; gap: 14px;
+      animation: slideUp 0.6s ease both;
+    }
+    .flow-card:nth-child(1){animation-delay:.1s} .flow-card:nth-child(2){animation-delay:.2s} .flow-card:nth-child(3){animation-delay:.3s}
+    .flow-card:nth-child(4){animation-delay:.4s} .flow-card:nth-child(5){animation-delay:.5s} .flow-card:nth-child(6){animation-delay:.6s}
+    @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .flow-icon { font-size: 28px; flex-shrink: 0; }
+    .flow-info .flow-name { font-size: 13px; font-weight: 700; }
+    .flow-info .flow-status { font-size: 11px; color: var(--secondary); margin-top: 2px; }
+    .flow-check { margin-right: auto; color: var(--secondary); font-size: 18px; }
+
+    /* ─── SECTION COMMON ─── */
+    section { padding: 100px 0; }
+    .section-header { text-align: center; margin-bottom: 64px; }
+    .section-title { font-size: clamp(28px, 4vw, 48px); font-weight: 900; margin-bottom: 16px; letter-spacing: -1px; }
+    .section-desc { font-size: 17px; color: var(--text-muted); max-width: 500px; margin: 0 auto; }
+
+    /* ─── LOGOS BAR ─── */
+    .logos-section { padding: 40px 0; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .logos-label { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 28px; letter-spacing: 1px; text-transform: uppercase; }
+    .logos-track { display: flex; gap: 48px; justify-content: center; align-items: center; flex-wrap: wrap; }
+    .logo-item { font-size: 15px; font-weight: 700; color: var(--text-muted); opacity: 0.6; transition: opacity .2s; cursor: default; }
+    .logo-item:hover { opacity: 1; color: var(--text); }
+
+    /* ─── FEATURES ─── */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px;
+      transition: all .3s; position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(108,99,255,0.05), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .feature-card:hover { border-color: rgba(108,99,255,0.4); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(108,99,255,0.12); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon-wrap {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: rgba(108,99,255,0.12); display: flex; align-items: center;
+      justify-content: center; font-size: 24px; margin-bottom: 20px;
+    }
+    .feature-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+    .feature-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+    /* ─── HOW IT WORKS ─── */
+    .how-it-works { background: var(--surface); }
+    .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; }
+    .steps-grid::before {
+      content: ''; position: absolute; top: 40px; right: 60px; left: 60px; height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      opacity: 0.3; pointer-events: none;
+    }
+    .step-card { text-align: center; padding: 32px 20px; }
+    .step-num {
+      width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 900; position: relative; z-index: 1;
+      box-shadow: 0 0 0 6px rgba(108,99,255,0.12), 0 4px 20px var(--glow);
+    }
+    .step-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; }
+    .step-desc { font-size: 13px; color: var(--text-muted); }
+
+    /* ─── INTEGRATIONS ─── */
+    .integrations-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
+    }
+    .integration-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      transition: all .3s; cursor: default;
+    }
+    .integration-item:hover { border-color: rgba(108,99,255,0.4); transform: translateY(-4px); background: var(--surface2); }
+    .int-icon { font-size: 36px; }
+    .int-name { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+
+    /* ─── PRICING ─── */
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; }
+    .pricing-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 40px 32px; position: relative;
+      transition: all .3s;
+    }
+    .pricing-card.featured {
+      background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,212,170,0.08));
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary), 0 16px 48px var(--glow);
+      transform: scale(1.04);
+    }
+    .popular-badge {
+      position: absolute; top: -14px; right: 50%; transform: translateX(50%);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff; padding: 4px 18px; border-radius: 999px; font-size: 12px; font-weight: 800;
+    }
+    .plan-name { font-size: 14px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    .plan-price { font-size: 52px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+    .plan-price span { font-size: 20px; font-weight: 600; color: var(--text-muted); }
+    .plan-period { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+    .plan-divider { height: 1px; background: var(--border); margin: 24px 0; }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .plan-features li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .plan-features li::before { content: '✓'; color: var(--secondary); font-weight: 900; flex-shrink: 0; }
+    .plan-features li.disabled { color: var(--text-muted); opacity: 0.5; }
+    .plan-features li.disabled::before { content: '×'; color: var(--text-muted); }
+    .btn-plan { width: 100%; justify-content: center; }
+
+    /* ─── TESTIMONIALS ─── */
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .testimonial-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px; transition: all .3s;
+    }
+    .testimonial-card:hover { border-color: rgba(108,99,255,0.3); transform: translateY(-4px); }
+    .stars { color: #fbbf24; font-size: 14px; margin-bottom: 16px; }
+    .testimonial-text { font-size: 15px; line-height: 1.8; color: var(--text-muted); margin-bottom: 24px; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; flex-shrink: 0;
+    }
+    .author-name { font-size: 14px; font-weight: 800; }
+    .author-role { font-size: 12px; color: var(--text-muted); }
+
+    /* ─── CTA ─── */
+    .cta-section {
+      background: var(--surface); text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(108,99,255,0.15) 0%, transparent 70%);
+    }
+    .cta-section .container { position: relative; z-index: 1; }
+    .cta-title { font-size: clamp(32px, 5vw, 56px); font-weight: 900; margin-bottom: 20px; letter-spacing: -1px; }
+    .cta-desc { font-size: 17px; color: var(--text-muted); max-width: 480px; margin: 0 auto 40px; }
+    .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .cta-note { margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--bg); border-top: 1px solid var(--border); padding: 60px 0 32px;
+    }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+    .footer-brand .logo { font-size: 24px; display: inline-block; }
+    .footer-brand p { font-size: 14px; color: var(--text-muted); margin-top: 14px; max-width: 260px; line-height: 1.7; }
+    .footer-col h4 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; color: var(--text); }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col a { font-size: 14px; color: var(--text-muted); text-decoration: none; transition: color .2s; }
+    .footer-col a:hover { color: var(--primary); }
+    .footer-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 28px; border-top: 1px solid var(--border); }
+    .footer-bottom p { font-size: 13px; color: var(--text-muted); }
+    .social-links { display: flex; gap: 12px; }
+    .social-link {
+      width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+      text-decoration: none; transition: all .2s;
+    }
+    .social-link:hover { border-color: var(--primary); background: rgba(108,99,255,0.1); }
+
+    /* ─── WhatsApp Float ─── */
+    .whatsapp-float {
+      position: fixed; bottom: 28px; left: 28px; z-index: 999;
+      width: 58px; height: 58px; border-radius: 50%;
+      background: #25d366;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none; font-size: 28px;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.5);
+      transition: all .25s ease;
+      animation: waBounce 2s ease-in-out 3s 3;
+    }
+    .whatsapp-float:hover { transform: scale(1.12); box-shadow: 0 8px 32px rgba(37,211,102,0.6); }
+    .whatsapp-float .wa-tooltip {
+      position: absolute; left: 68px; background: #25d366; color: #fff;
+      padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .whatsapp-float:hover .wa-tooltip { opacity: 1; }
+    @keyframes waBounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+    /* ─── Contact Form ─── */
+    .contact-section { background: var(--bg); }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .contact-info h3 { font-size: 32px; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.5px; }
+    .contact-info p { font-size: 15px; color: var(--text-muted); line-height: 1.8; margin-bottom: 32px; }
+    .contact-item { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .contact-item-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(108,99,255,0.12); display: flex; align-items: center;
+      justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .contact-item-text { font-size: 14px; color: var(--text-muted); }
+    .contact-item-text strong { display: block; color: var(--text); font-size: 15px; margin-bottom: 2px; }
+    .contact-form-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 40px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .form-group label { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 16px;
+      color: var(--text); font-size: 14px; font-family: var(--font);
+      transition: border-color .2s; outline: none; width: 100%;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108,99,255,0.12); }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-submit { width: 100%; justify-content: center; margin-top: 8px; font-size: 16px; padding: 16px; }
+    .form-success {
+      display: none; text-align: center; padding: 20px;
+      background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3);
+      border-radius: var(--radius); color: var(--secondary); font-weight: 700; margin-top: 16px;
+    }
+    @media(max-width: 900px) {
+      .contact-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Animations ─── */
+    .fade-in { opacity: 0; transform: translateY(30px); transition: all .7s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Responsive ─── */
+    @media(max-width: 900px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid::before { display: none; }
+      .integrations-grid { grid-template-columns: repeat(3, 1fr); }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .pricing-card.featured { transform: none; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .nav-links { display: none; }
+      .hero-visual { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media(max-width: 580px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .integrations-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr; }
+      .hero-stats { gap: 28px; flex-wrap: wrap; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+      .hero-visual { grid-template-columns: 1fr; max-width: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ WhatsApp Float Button ═══ -->
+  <!-- استبدل 966500000000 برقم واتساب الفعلي مع كود الدولة (بدون + أو 00) -->
+  <a href="https://wa.me/966500000000?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A3%D8%B9%D8%B1%D9%81%20%D8%A3%D9%83%D8%AB%D8%B1%20%D8%B9%D9%86%20%D8%AE%D8%AF%D9%85%D8%A7%D8%AA%20%D8%A3%D9%88%D8%AA%D9%88%20%D9%81%D9%84%D9%88"
+     class="whatsapp-float" target="_blank" rel="noopener" aria-label="تواصل عبر واتساب">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.847L0 24l6.335-1.508A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.653-.495-5.19-1.36l-.372-.22-3.862.919.976-3.768-.242-.387A9.937 9.937 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+    </svg>
+    <span class="wa-tooltip">تحدث معنا الآن</span>
+  </a>
+
+  <!-- ─── NAV ─── -->
+  <nav id="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="logo">⚡ أوتو فلو</a>
+      <ul class="nav-links">
+        <li><a href="#features">المميزات</a></li>
+        <li><a href="#how">كيف يعمل</a></li>
+        <li><a href="#integrations">التكاملات</a></li>
+        <li><a href="#pricing">الأسعار</a></li>
+        <li><a href="#contact">تواصل</a></li>
+        <li><a href="about.html">عن المنصة</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="login.html" class="btn btn-outline" style="padding:10px 20px;font-size:14px;">تسجيل الدخول</a>
+        <a href="signup.html" class="btn btn-primary" style="padding:10px 20px;font-size:14px;">ابدأ مجاناً</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="badge"><span class="badge-dot"></span> جديد — أتمتة ذكية بالذكاء الاصطناعي</div>
+        <h1 class="hero-title">
+          شغّل أعمالك<br/>
+          على <span class="highlight">طيار آلي</span>
+        </h1>
+        <p class="hero-desc">
+          وفّر آلاف الساعات سنوياً بأتمتة مهامك المتكررة. ربط تطبيقاتك، بناء سير عمل ذكية، وتحقيق نتائج أسرع بدون كتابة كود.
+        </p>
+        <div class="hero-actions">
+          <a href="signup.html" class="btn btn-primary"><span class="btn-icon">🚀</span> ابدأ مجاناً الآن</a>
+          <a href="#how" class="btn btn-outline"><span class="btn-icon">▶️</span> شاهد كيف يعمل</a>
+        </div>
+
+        <!-- Mini workflow cards -->
+        <div class="hero-visual">
+          <div class="flow-card">
+            <span class="flow-icon">📧</span>
+            <div class="flow-info">
+              <div class="flow-name">إيميل تلقائي</div>
+              <div class="flow-status">✓ مكتمل</div>
+            </div>
+          </div>
+          <div class="flow-card">
+            <span class="flow-icon">📊</span>
+            <div class="flow-info">
+              <div class="flow-name">تقرير يومي</div>
+              <div class="flow-status">✓ مكتمل</div>
+            </div>
+          </div>
+          <div class="flow-card">
+            <span class="flow-icon">💬</span>
+            <div class="flow-info">
+              <div class="flow-name">رد تلقائي</div>
+              <div class="flow-status">✓ مكتمل</div>
+            </div>
+          </div>
+          <div class="flow-card">
+            <span class="flow-icon">🔔</span>
+            <div class="flow-info">
+              <div class="flow-name">تنبيه فوري</div>
+              <div class="flow-status">✓ مكتمل</div>
+            </div>
+          </div>
+          <div class="flow-card">
+            <span class="flow-icon">🗂️</span>
+            <div class="flow-info">
+              <div class="flow-name">إدارة ملفات</div>
+              <div class="flow-status">✓ مكتمل</div>
+            </div>
+          </div>
+          <div class="flow-card">
+            <span class="flow-icon">📈</span>
+            <div class="flow-info">
+              <div class="flow-name">تحليل بيانات</div>
+              <div class="flow-status">✓ مكتمل</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-num">+12K</div>
+            <div class="stat-label">عميل نشط</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">500M</div>
+            <div class="stat-label">مهمة أُنجزت</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">99.9%</div>
+            <div class="stat-label">وقت التشغيل</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">3.5x</div>
+            <div class="stat-label">توفير الوقت</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── LOGOS BAR ─── -->
+  <div class="logos-section">
+    <div class="container">
+      <div class="logos-label">يثق بنا عملاء من كبرى الشركات</div>
+      <div class="logos-track">
+        <span class="logo-item">▲ نيوم</span>
+        <span class="logo-item">◉ سابك</span>
+        <span class="logo-item">◆ المراعي</span>
+        <span class="logo-item">● stc</span>
+        <span class="logo-item">■ أرامكو</span>
+        <span class="logo-item">◈ الراجحي</span>
+        <span class="logo-item">◇ تمكين</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── FEATURES ─── -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="badge"><span class="badge-dot"></span> المميزات</div>
+        <h2 class="section-title">كل ما تحتاجه للأتمتة الاحترافية</h2>
+        <p class="section-desc">منصة متكاملة تجمع القوة مع البساطة لتحقيق أقصى إنتاجية</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <div class="feature-icon-wrap">⚡</div>
+          <div class="feature-title">سير عمل فوري</div>
+          <p class="feature-desc">ابنِ workflows معقدة بسحب وإفلات بسيط. لا حاجة لكود أو خبرة تقنية.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon-wrap">🤖</div>
+          <div class="feature-title">ذكاء اصطناعي مدمج</div>
+          <p class="feature-desc">نماذج AI تفهم بياناتك وتتخذ قرارات ذكية تلقائياً بناءً على السياق.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon-wrap">🔗</div>
+          <div class="feature-title">+500 تكامل</div>
+          <p class="feature-desc">وصّل أي تطبيق تستخدمه — من Slack وGoogle إلى SAP وSalesforce.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon-wrap">📊</div>
+          <div class="feature-title">تقارير لحظية</div>
+          <p class="feature-desc">تابع أداء كل workflow بلوحات بيانات تفاعلية محدّثة في الوقت الفعلي.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon-wrap">🔒</div>
+          <div class="feature-title">أمان على مستوى المؤسسات</div>
+          <p class="feature-desc">تشفير من طرف إلى طرف، امتثال SOC 2، وتحكم دقيق في الصلاحيات.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <div class="feature-icon-wrap">🚀</div>
+          <div class="feature-title">تحجيم تلقائي</div>
+          <p class="feature-desc">البنية التحتية تكبر معك. من مهمة واحدة إلى ملايين المهام بدون تدخل.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ─── -->
+  <section id="how" class="how-it-works">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="badge"><span class="badge-dot"></span> كيف يعمل</div>
+        <h2 class="section-title">ابدأ الأتمتة في 4 خطوات</h2>
+        <p class="section-desc">من الفكرة إلى التشغيل الكامل خلال دقائق</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card fade-in">
+          <div class="step-num">1</div>
+          <div class="step-title">اختر المُشغِّل</div>
+          <p class="step-desc">حدد الحدث اللي يبدأ الأتمتة — بريد إلكتروني، نموذج، وقت محدد، أو أي حدث آخر.</p>
+        </div>
+        <div class="step-card fade-in">
+          <div class="step-num">2</div>
+          <div class="step-title">وصّل التطبيقات</div>
+          <p class="step-desc">اختار التطبيقات اللي تبي تربطها ببعض من مكتبتنا بـ +500 تكامل.</p>
+        </div>
+        <div class="step-card fade-in">
+          <div class="step-num">3</div>
+          <div class="step-title">صمّم الـ Workflow</div>
+          <p class="step-desc">استخدم المحرر المرئي لبناء المنطق والشروط والإجراءات بسهولة تامة.</p>
+        </div>
+        <div class="step-card fade-in">
+          <div class="step-num">4</div>
+          <div class="step-title">شغّل وراقب</div>
+          <p class="step-desc">فعّل الأتمتة وتابع كل شيء من لوحة التحكم اللحظية.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── INTEGRATIONS ─── -->
+  <section id="integrations">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="badge"><span class="badge-dot"></span> التكاملات</div>
+        <h2 class="section-title">يعمل مع التطبيقات اللي تحبها</h2>
+        <p class="section-desc">تكامل مباشر مع أكثر من 500 تطبيق وخدمة</p>
+      </div>
+      <div class="integrations-grid fade-in">
+        <div class="integration-item"><div class="int-icon">📧</div><div class="int-name">Gmail</div></div>
+        <div class="integration-item"><div class="int-icon">💬</div><div class="int-name">Slack</div></div>
+        <div class="integration-item"><div class="int-icon">📋</div><div class="int-name">Notion</div></div>
+        <div class="integration-item"><div class="int-icon">🗂️</div><div class="int-name">Airtable</div></div>
+        <div class="integration-item"><div class="int-icon">📊</div><div class="int-name">Sheets</div></div>
+        <div class="integration-item"><div class="int-icon">🛒</div><div class="int-name">Shopify</div></div>
+        <div class="integration-item"><div class="int-icon">📞</div><div class="int-name">WhatsApp</div></div>
+        <div class="integration-item"><div class="int-icon">📅</div><div class="int-name">Calendar</div></div>
+        <div class="integration-item"><div class="int-icon">🤖</div><div class="int-name">ChatGPT</div></div>
+        <div class="integration-item"><div class="int-icon">☁️</div><div class="int-name">Dropbox</div></div>
+        <div class="integration-item"><div class="int-icon">💳</div><div class="int-name">Stripe</div></div>
+        <div class="integration-item"><div class="int-icon">📣</div><div class="int-name">Mailchimp</div></div>
+        <div class="integration-item"><div class="int-icon">🔧</div><div class="int-name">Zapier</div></div>
+        <div class="integration-item"><div class="int-icon">📱</div><div class="int-name">HubSpot</div></div>
+        <div class="integration-item"><div class="int-icon">⚙️</div><div class="int-name">+ 485</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PRICING ─── -->
+  <section id="pricing" style="background: var(--surface);">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="badge"><span class="badge-dot"></span> الأسعار</div>
+        <h2 class="section-title">أسعار بسيطة وشفافة</h2>
+        <p class="section-desc">ابدأ مجاناً وكبّر مع أعمالك. بدون رسوم خفية.</p>
+      </div>
+      <div class="pricing-grid fade-in">
+        <!-- Starter -->
+        <div class="pricing-card">
+          <div class="plan-name">مبتدئ</div>
+          <div class="plan-price">مجاني<span></span></div>
+          <div class="plan-period">للأبد، بدون بطاقة</div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li>100 مهمة شهرياً</li>
+            <li>5 workflows نشطة</li>
+            <li>+50 تكامل</li>
+            <li class="disabled">ذكاء اصطناعي مدمج</li>
+            <li class="disabled">دعم أولوية</li>
+          </ul>
+          <a href="#" class="btn btn-outline btn-plan">ابدأ مجاناً</a>
+        </div>
+        <!-- Pro -->
+        <div class="pricing-card featured">
+          <div class="popular-badge">الأكثر شيوعاً</div>
+          <div class="plan-name">احترافي</div>
+          <div class="plan-price">199<span> ر.س</span></div>
+          <div class="plan-period">شهرياً، يُدفع سنوياً</div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li>10,000 مهمة شهرياً</li>
+            <li>workflows غير محدودة</li>
+            <li>+500 تكامل</li>
+            <li>ذكاء اصطناعي مدمج</li>
+            <li>دعم أولوية 24/7</li>
+          </ul>
+          <a href="#" class="btn btn-primary btn-plan">ابدأ تجربتك</a>
+        </div>
+        <!-- Enterprise -->
+        <div class="pricing-card">
+          <div class="plan-name">مؤسسي</div>
+          <div class="plan-price">تواصل<span></span></div>
+          <div class="plan-period">حلول مخصصة لفريقك</div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li>مهام غير محدودة</li>
+            <li>workflows غير محدودة</li>
+            <li>جميع التكاملات</li>
+            <li>AI مخصص لأعمالك</li>
+            <li>مدير حساب مخصص</li>
+          </ul>
+          <a href="#" class="btn btn-outline btn-plan">تواصل معنا</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TESTIMONIALS ─── -->
+  <section>
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="badge"><span class="badge-dot"></span> آراء العملاء</div>
+        <h2 class="section-title">ماذا يقول عملاؤنا</h2>
+        <p class="section-desc">آلاف الشركات تثق بأوتو فلو لتشغيل أعمالها</p>
+      </div>
+      <div class="testimonials-grid fade-in">
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">"وفّرنا أكثر من 30 ساعة أسبوعياً على المهام اليدوية. فريقنا الآن يركز على الأهم. أوتو فلو غير طريقة عملنا كلياً."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">ع</div>
+            <div>
+              <div class="author-name">عبدالله المطيري</div>
+              <div class="author-role">مدير العمليات، تقنيات الرياض</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">"الواجهة بسيطة جداً. ربطنا CRM بنظام الإيميل والإشعارات خلال ساعة. التقارير التلقائية وفّرت على فريقنا ساعات يومياً."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">س</div>
+            <div>
+              <div class="author-name">سارة الغامدي</div>
+              <div class="author-role">مؤسسة، ستارت أب التجزئة</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">"استخدمنا أوتو فلو لأتمتة onboarding العملاء. النتيجة؟ رضا العملاء ارتفع 40% وتقليل الأخطاء اليدوية بشكل كامل."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">م</div>
+            <div>
+              <div class="author-name">محمد العتيبي</div>
+              <div class="author-role">CTO، مجموعة التقنية المتقدمة</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CONTACT FORM (Netlify Forms — مدمج تلقائياً، بدون حساب خارجي) ═══ -->
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="badge"><span class="badge-dot"></span> تواصل معنا</div>
+        <h2 class="section-title">نحن هنا لمساعدتك</h2>
+        <p class="section-desc">هل لديك سؤال أو تريد عرضاً مخصصاً؟ فريقنا يرد خلال ساعات</p>
+      </div>
+      <div class="contact-grid fade-in">
+        <div class="contact-info">
+          <h3>دعنا نشغّل<br/>أعمالك معاً</h3>
+          <p>سواء كنت شركة صغيرة أو مؤسسة كبيرة، لدينا حل يناسبك. تواصل معنا وسنساعدك في تصميم خطة أتمتة مخصصة لأعمالك.</p>
+          <div class="contact-item">
+            <div class="contact-item-icon">📧</div>
+            <div class="contact-item-text">
+              <strong>البريد الإلكتروني</strong>
+              hhmm.18t@gmail.com
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon">📞</div>
+            <div class="contact-item-text">
+              <strong>الهاتف / واتساب</strong>
+              تواصل عبر الزر الأخضر
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon">🕐</div>
+            <div class="contact-item-text">
+              <strong>ساعات العمل</strong>
+              الأحد – الخميس، 9 ص – 6 م
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-form-wrap">
+          <form id="contactForm" name="contact" data-netlify="true" netlify-honeypot="bot-field" method="POST">
+            <input type="hidden" name="form-name" value="contact" />
+            <input type="hidden" name="bot-field" />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fname">الاسم الأول *</label>
+                <input type="text" id="fname" name="first_name" placeholder="محمد" required />
+              </div>
+              <div class="form-group">
+                <label for="lname">اسم الشركة</label>
+                <input type="text" id="lname" name="company" placeholder="شركة التقنية" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">البريد الإلكتروني *</label>
+              <input type="email" id="email" name="email" placeholder="name@company.com" required />
+            </div>
+            <div class="form-group">
+              <label for="service">الخدمة المطلوبة</label>
+              <select id="service" name="service">
+                <option value="">اختر الخدمة...</option>
+                <option value="automation">أتمتة العمليات</option>
+                <option value="integration">ربط التطبيقات</option>
+                <option value="ai">حلول الذكاء الاصطناعي</option>
+                <option value="enterprise">حلول مؤسسية</option>
+                <option value="other">أخرى</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">رسالتك *</label>
+              <textarea id="message" name="message" placeholder="أخبرنا عن مشروعك أو سؤالك..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary form-submit">
+              <span class="btn-icon">🚀</span> إرسال الرسالة
+            </button>
+            <div class="form-success" id="formSuccess">
+              ✅ تم إرسال رسالتك بنجاح! سنتواصل معك خلال 24 ساعة.
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CTA ─── -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="fade-in">
+        <h2 class="cta-title">جاهز تشغّل أعمالك<br/> على طيار آلي؟</h2>
+        <p class="cta-desc">انضم لأكثر من 12,000 شركة تستخدم أوتو فلو لتوفير الوقت وزيادة الإنتاجية.</p>
+        <div class="cta-actions">
+          <a href="signup.html" class="btn btn-primary"><span class="btn-icon">🚀</span> ابدأ مجاناً — بدون بطاقة</a>
+          <a href="#contact" class="btn btn-outline"><span class="btn-icon">📅</span> احجز عرضاً تجريبياً</a>
+        </div>
+        <p class="cta-note">14 يوم تجربة مجانية كاملة على الباقة الاحترافية — بدون التزام</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="logo">⚡ أوتو فلو</a>
+          <p>منصة الأتمتة الذكية التي تساعد فرق العمل على التركيز على ما يهم، وترك المهام المتكررة لنا.</p>
+        </div>
+        <div class="footer-col">
+          <h4>المنتج</h4>
+          <ul>
+            <li><a href="#">المميزات</a></li>
+            <li><a href="#">التكاملات</a></li>
+            <li><a href="#">الأسعار</a></li>
+            <li><a href="#">خارطة الطريق</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>الشركة</h4>
+          <ul>
+            <li><a href="#">من نحن</a></li>
+            <li><a href="#">المدونة</a></li>
+            <li><a href="#">الوظائف</a></li>
+            <li><a href="#">اتصل بنا</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>الدعم</h4>
+          <ul>
+            <li><a href="#">مركز المساعدة</a></li>
+            <li><a href="#">التوثيق</a></li>
+            <li><a href="#">المجتمع</a></li>
+            <li><a href="#">حالة الخدمة</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 أوتو فلو. جميع الحقوق محفوظة.</p>
+        <div class="social-links">
+          <a href="#" class="social-link">𝕏</a>
+          <a href="#" class="social-link">in</a>
+          <a href="#" class="social-link">▶</a>
+          <a href="#" class="social-link">◆</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar shrink on scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Intersection Observer for fade-in animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Smooth active link highlight
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        if (window.scrollY >= section.offsetTop - 120) current = section.getAttribute('id');
+      });
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--primary)' : '';
+      });
+    });
+
+    // Animated counter
+    function animateCounter(el, target, suffix = '') {
+      let current = 0;
+      const increment = target / 60;
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) { current = target; clearInterval(timer); }
+        el.textContent = (Number.isInteger(target) ? Math.floor(current) : current.toFixed(1)) + suffix;
+      }, 24);
+    }
+
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const nums = entry.target.querySelectorAll('.stat-num');
+          const data = [
+            { val: 12, suffix: 'K+' },
+            { val: 500, suffix: 'M' },
+            { val: 99.9, suffix: '%' },
+            { val: 3.5, suffix: 'x' }
+          ];
+          nums.forEach((el, i) => animateCounter(el, data[i].val, data[i].suffix));
+          statsObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    const statsSection = document.querySelector('.hero-stats');
+    if (statsSection) statsObserver.observe(statsSection);
+
+    // Netlify Forms AJAX submit
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = contactForm.querySelector('.form-submit');
+        btn.textContent = '⏳ جاري الإرسال...';
+        btn.disabled = true;
+        try {
+          const res = await fetch('/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(new FormData(contactForm)).toString()
+          });
+          if (res.ok) {
+            contactForm.reset();
+            document.getElementById('formSuccess').style.display = 'block';
+            btn.style.display = 'none';
+          } else {
+            btn.textContent = '❌ حدث خطأ، حاول مرة أخرى';
+            btn.disabled = false;
+          }
+        } catch {
+          btn.textContent = '❌ حدث خطأ، حاول مرة أخرى';
+          btn.disabled = false;
+        }
+      });
+    }
+  </script>
+
+  <!-- ─── Netlify Identity Email Confirmation Handler ─── -->
+  <script>
+    (function(){
+      const h = new URLSearchParams(window.location.hash.slice(1));
+      const base = window.location.origin + '/.netlify/identity';
+
+      function storeAndGo(accessToken, refreshToken) {
+        fetch(base + '/user', { headers: { Authorization: 'Bearer ' + accessToken } })
+          .then(r => r.json()).then(u => {
+            if (u && u.id) {
+              u.token = { access_token: accessToken, refresh_token: refreshToken || '', token_type: 'bearer', expires_in: 3600 };
+              localStorage.setItem('af_auth', JSON.stringify(u));
+              window.location.href = 'dashboard.html';
+            }
+          }).catch(() => { window.location.href = 'login.html'; });
+      }
+
+      const confToken = h.get('confirmation_token');
+      const invToken  = h.get('invite_token');
+      const accessToken = h.get('access_token');
+
+      if (confToken) {
+        // Email confirmation link clicked
+        fetch(base + '/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'signup', token: confToken })
+        }).then(r => r.json()).then(d => {
+          if (d.access_token) storeAndGo(d.access_token, d.refresh_token);
+        }).catch(() => {});
+      } else if (invToken) {
+        window.location.href = 'signup.html#invite_token=' + invToken;
+      } else if (accessToken && (h.get('type') === 'signup' || h.get('type') === 'recovery')) {
+        storeAndGo(accessToken, h.get('refresh_token'));
+      }
+    })();
+  </script>
+</body>
+</html>

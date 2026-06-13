@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>الإعدادات | أوتو فلو</title>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--primary:#6c63ff;--primary-dark:#4b44cc;--secondary:#00d4aa;--accent:#ff6584;--bg:#0a0a14;--surface:#12121f;--surface2:#1a1a2e;--text:#e8e8f0;--text-muted:#8888aa;--border:rgba(108,99,255,0.15);--glow:rgba(108,99,255,0.3);--font:'Segoe UI',system-ui,sans-serif;--radius:16px;--radius-sm:8px;--sidebar:260px;}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;min-height:100vh;}
+    .sidebar{width:var(--sidebar);background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;right:0;bottom:0;z-index:50;}
+    .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+    .sidebar-logo a{font-size:20px;font-weight:900;text-decoration:none;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .sidebar-nav{flex:1;padding:20px 12px;display:flex;flex-direction:column;gap:4px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius-sm);color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:600;transition:all .2s;}
+    .nav-item:hover{background:rgba(108,99,255,.08);color:var(--text);}
+    .nav-item.active{background:rgba(108,99,255,.15);color:var(--primary);}
+    .nav-item .icon{font-size:18px;width:22px;text-align:center;}
+    .nav-section{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);padding:16px 14px 8px;opacity:.6;}
+    .sidebar-footer{padding:16px 12px;border-top:1px solid var(--border);}
+    .user-card{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-sm);}
+    .user-avatar-lg{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-plan{font-size:11px;color:var(--secondary);font-weight:600;}
+    .logout-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;transition:color .2s;}
+    .logout-btn:hover{color:var(--accent);}
+    .main{margin-right:var(--sidebar);flex:1;}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 32px;font-size:20px;font-weight:900;letter-spacing:-.5px;position:sticky;top:0;z-index:40;}
+    .content{padding:32px;max-width:760px;}
+
+    /* TABS */
+    .tabs{display:flex;gap:4px;margin-bottom:32px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px;width:fit-content;}
+    .tab{padding:9px 20px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--text-muted);transition:all .2s;font-family:var(--font);}
+    .tab.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px var(--glow);}
+
+    /* CARDS */
+    .settings-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;}
+    .card-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+    .card-desc{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+    .form-group{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    label{font-size:13px;font-weight:700;color:var(--text-muted);}
+    input{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;color:var(--text);font-size:14px;font-family:var(--font);outline:none;transition:border-color .2s;width:100%;}
+    input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,99,255,.1);}
+    input:disabled{opacity:.5;cursor:not-allowed;}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:999px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .25s;font-family:var(--font);}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 4px 16px var(--glow);}
+    .btn-primary:hover{transform:translateY(-1px);}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+    .btn-ghost:hover{border-color:var(--primary);color:var(--primary);}
+    .btn-danger{background:rgba(255,101,132,.1);border:1px solid rgba(255,101,132,.25);color:var(--accent);}
+    .btn-danger:hover{background:rgba(255,101,132,.2);}
+
+    /* PLAN CARDS */
+    .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+    .plan-card{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .3s;position:relative;}
+    .plan-card.current{border-color:var(--primary);background:rgba(108,99,255,.08);}
+    .plan-card.current::after{content:'حالي';position:absolute;top:-10px;right:50%;transform:translateX(50%);background:var(--primary);color:#fff;padding:2px 12px;border-radius:999px;font-size:11px;font-weight:800;}
+    .plan-name{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;}
+    .plan-price{font-size:28px;font-weight:900;margin-bottom:4px;}
+    .plan-price small{font-size:13px;font-weight:600;color:var(--text-muted);}
+    .plan-feature{font-size:12px;color:var(--text-muted);margin-top:8px;}
+    .plan-feature::before{content:'✓ ';color:var(--secondary);}
+
+    /* DANGER ZONE */
+    .danger-zone{background:rgba(255,101,132,.05);border:1px solid rgba(255,101,132,.2);border-radius:var(--radius);padding:24px;}
+    .danger-title{font-size:14px;font-weight:800;color:var(--accent);margin-bottom:4px;}
+    .danger-desc{font-size:13px;color:var(--text-muted);margin-bottom:16px;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:12px 24px;font-size:14px;font-weight:700;z-index:999;transition:transform .3s;pointer-events:none;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    .toast.success{border-color:rgba(0,212,170,.4);color:var(--secondary);}
+    .toast.error{border-color:rgba(255,101,132,.4);color:var(--accent);}
+
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
+    @media(max-width:768px){.sidebar{display:none;}.main{margin-right:0;}.content{padding:20px;}.plan-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><a href="dashboard.html">⚡ أوتو فلو</a></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a href="dashboard.html" class="nav-item"><span class="icon">📊</span> لوحة التحكم</a>
+      <a href="workflows.html" class="nav-item"><span class="icon">⚡</span> سير العمل</a>
+      <a href="builder.html" class="nav-item"><span class="icon">🔧</span> بناء Workflow</a>
+      <div class="nav-section">الإعدادات</div>
+      <a href="settings.html" class="nav-item active"><span class="icon">⚙️</span> الإعدادات</a>
+      <a href="index.html" class="nav-item"><span class="icon">🌐</span> الموقع الرئيسي</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar-lg" id="userInitial">؟</div>
+        <div class="user-info"><div class="user-name" id="userName">...</div><div class="user-plan" id="userPlan">الباقة المجانية</div></div>
+        <button class="logout-btn" onclick="signOut()">⬅️</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">الإعدادات</div>
+    <div class="content">
+      <div class="tabs">
+        <button class="tab active" data-tab="profile">الملف الشخصي</button>
+        <button class="tab" data-tab="plan">الباقة</button>
+        <button class="tab" data-tab="security">الأمان</button>
+      </div>
+
+      <!-- PROFILE TAB -->
+      <div class="tab-content active" id="tab-profile">
+        <div class="settings-card">
+          <div class="card-title">معلوماتك الشخصية</div>
+          <div class="card-desc">هذه المعلومات تظهر في حسابك وللفريق</div>
+          <div class="form-row">
+            <div class="form-group"><label>الاسم الكامل</label><input type="text" id="fullName" placeholder="اسمك"/></div>
+            <div class="form-group"><label>اسم الشركة</label><input type="text" id="company" placeholder="شركتك"/></div>
+          </div>
+          <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="emailField" disabled/></div>
+          <button class="btn btn-primary" id="saveProfileBtn">💾 حفظ التغييرات</button>
+        </div>
+
+        <div class="danger-zone">
+          <div class="danger-title">⚠️ منطقة الخطر</div>
+          <div class="danger-desc">حذف الحساب سيؤدي إلى حذف جميع بياناتك وworkflows بشكل دائم ولا يمكن التراجع عنه.</div>
+          <button class="btn btn-danger" id="deleteAccountBtn">🗑️ حذف الحساب نهائياً</button>
+        </div>
+      </div>
+
+      <!-- PLAN TAB -->
+      <div class="tab-content" id="tab-plan">
+        <div class="settings-card">
+          <div class="card-title">باقتك الحالية</div>
+          <div class="card-desc">اختر الباقة المناسبة لأعمالك</div>
+          <div class="plan-grid">
+            <div class="plan-card current" id="plan-free">
+              <div class="plan-name">مجاني</div>
+              <div class="plan-price">0 <small>ر.س</small></div>
+              <div class="plan-feature">100 مهمة / شهر</div>
+              <div class="plan-feature">5 workflows</div>
+              <div class="plan-feature">+50 تكامل</div>
+            </div>
+            <div class="plan-card" id="plan-pro">
+              <div class="plan-name">احترافي</div>
+              <div class="plan-price">199 <small>ر.س</small></div>
+              <div class="plan-feature">10,000 مهمة / شهر</div>
+              <div class="plan-feature">workflows غير محدودة</div>
+              <div class="plan-feature">ذكاء اصطناعي مدمج</div>
+            </div>
+            <div class="plan-card" id="plan-enterprise">
+              <div class="plan-name">مؤسسي</div>
+              <div class="plan-price">تواصل</div>
+              <div class="plan-feature">غير محدود</div>
+              <div class="plan-feature">AI مخصص</div>
+              <div class="plan-feature">مدير حساب</div>
+            </div>
+          </div>
+          <a href="index.html#contact" class="btn btn-primary">⬆️ ترقية الباقة</a>
+        </div>
+
+        <div class="settings-card">
+          <div class="card-title">استخدامك هذا الشهر</div>
+          <div class="card-desc">تتجدد الحصة في بداية كل شهر</div>
+          <div style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><span>المهام المستخدمة</span><span id="usageCount" style="font-weight:700">— / 100</span></div>
+            <div style="background:var(--surface2);border-radius:999px;height:8px;overflow:hidden;"><div id="usageBar" style="height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:999px;width:0%;transition:width .5s;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECURITY TAB -->
+      <div class="tab-content" id="tab-security">
+        <div class="settings-card">
+          <div class="card-title">تغيير كلمة المرور</div>
+          <div class="card-desc">استخدم كلمة مرور قوية لحماية حسابك</div>
+          <div class="form-group"><label>كلمة المرور الجديدة</label><input type="password" id="newPassword" placeholder="8 أحرف على الأقل" minlength="8"/></div>
+          <div class="form-group"><label>تأكيد كلمة المرور</label><input type="password" id="confirmPassword" placeholder="أعد كتابة كلمة المرور"/></div>
+          <button class="btn btn-primary" id="changePasswordBtn">🔒 تحديث كلمة المرور</button>
+        </div>
+
+        <div class="settings-card">
+          <div class="card-title">جلسات الدخول</div>
+          <div class="card-desc">تسجيل الخروج من جميع الأجهزة</div>
+          <button class="btn btn-ghost" id="signOutAllBtn">🔓 تسجيل الخروج من كل الأجهزة</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/supabase-config.js"></script>
+  <script>
+    function showToast(msg, type='success'){
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = `toast show ${type}`;
+      setTimeout(()=>t.classList.remove('show'), 3000);
+    }
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    (async () => {
+      const user = requireAuth();
+      if(!user) return;
+      const profile = getProfile();
+
+      document.getElementById('emailField').value = user.email;
+      document.getElementById('fullName').value = profile.full_name;
+      document.getElementById('company').value = profile.company;
+
+      const name = profile.full_name || user.email.split('@')[0];
+      document.getElementById('userName').textContent = name;
+      document.getElementById('userInitial').textContent = name[0].toUpperCase();
+
+      // Usage stats
+      const { count } = await db.from('workflow_runs').select('*',{count:'exact',head:true});
+      const total = count || 0;
+      document.getElementById('usageCount').textContent = `${total} / 100`;
+      document.getElementById('usageBar').style.width = Math.min(100, (total/100)*100)+'%';
+
+      // Save profile
+      document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('saveProfileBtn');
+        btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+        try {
+          await auth.updateProfile({
+            full_name: document.getElementById('fullName').value,
+            company:   document.getElementById('company').value
+          });
+          showToast('✅ تم حفظ التغييرات');
+          document.getElementById('userName').textContent = document.getElementById('fullName').value;
+        } catch(err) {
+          showToast('❌ ' + (err.message || 'فشل الحفظ'), 'error');
+        }
+        btn.disabled = false; btn.textContent = '💾 حفظ التغييرات';
+      });
+
+      // Change password
+      document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+        const pw = document.getElementById('newPassword').value;
+        const cpw = document.getElementById('confirmPassword').value;
+        if(pw !== cpw){ showToast('❌ كلمتا المرور غير متطابقتان','error'); return; }
+        if(pw.length < 8){ showToast('❌ كلمة المرور قصيرة جداً','error'); return; }
+        const btn = document.getElementById('changePasswordBtn');
+        btn.disabled = true; btn.textContent = '⏳ جاري التحديث...';
+        try {
+          await auth.updatePassword(pw);
+          showToast('✅ تم تحديث كلمة المرور');
+          document.getElementById('newPassword').value = '';
+          document.getElementById('confirmPassword').value = '';
+        } catch(err) {
+          showToast('❌ ' + (err.message || 'فشل التحديث'), 'error');
+        }
+        btn.disabled = false; btn.textContent = '🔒 تحديث كلمة المرور';
+      });
+
+      // Sign out all
+      document.getElementById('signOutAllBtn').addEventListener('click', () => signOut());
+
+      // Delete account
+      document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+        if(!confirm('هل أنت متأكد تماماً؟ سيتم حذف حسابك وجميع بياناتك بشكل دائم.')) return;
+        // Clear all local data for this user
+        Object.keys(localStorage)
+          .filter(k => k.startsWith(`af_${user.id}_`))
+          .forEach(k => localStorage.removeItem(k));
+        await auth.logout();
+        window.location.href = 'index.html';
+      });
+    })();
+  </script>
+</body>
+</html>
