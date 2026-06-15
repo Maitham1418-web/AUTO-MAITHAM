@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "job-search": {
+      "source": "proficientlyjobs/proficiently-claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/job-search/SKILL.md",
+      "computedHash": "3663fea016b350e34f014764436d6a3e267249108d79358f7cc60b6a603e72e9"
+    }
+  }
+}
