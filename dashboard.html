@@ -313,123 +313,6 @@
     return interval;
   }
 
-  // ── Canvas Video Generator ─────────────────────────────────────
-  function loadImg(file) {
-    return new Promise((res, rej) => {
-      const img = new Image();
-      img.onload = () => res(img);
-      img.onerror = rej;
-      img.src = URL.createObjectURL(file);
-    });
-  }
-
-  function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
-
-  async function canvasVideo(file, adType, videoSize, adText) {
-    const img = await loadImg(file);
-    const DIM = { '9:16':[540,960], '1:1':[540,540], '4:5':[540,675], '16:9':[960,540] };
-    const [W, H] = DIM[videoSize] || DIM['9:16'];
-
-    const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
-
-    // Cover + 18% extra room for Ken Burns movement
-    const cs = Math.max(W / img.width, H / img.height);
-    const iW = img.width * cs * 1.18, iH = img.height * cs * 1.18;
-
-    // Per-type color tint + animation direction
-    const cfg = {
-      promo_reel:    { r:120,g:0,b:200, zFrom:1.0,zTo:1.1,  pxD:1, pyD:1 },
-      product_story: { r:0,g:60,b:160,  zFrom:1.08,zTo:1.0, pxD:-1,pyD:0 },
-      offer_discount:{ r:200,g:20,b:20, zFrom:1.0,zTo:1.15, pxD:0, pyD:1 },
-      brand_intro:   { r:10,g:10,b:30,  zFrom:1.1,zTo:1.0,  pxD:1, pyD:1 },
-    };
-    const c = cfg[adType] || cfg.promo_reel;
-
-    return new Promise((resolve, reject) => {
-      const mime = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
-        .find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
-      const stream = canvas.captureStream(30);
-      const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 3_500_000 });
-      const chunks = [];
-      rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-      rec.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' }));
-      rec.onerror = () => reject(new Error('MediaRecorder failed'));
-
-      const DURATION = 5200, t0 = performance.now();
-
-      function frame(now) {
-        const raw = (now - t0) / DURATION;
-        const t = Math.min(raw, 1), te = ease(t);
-        const zoom = c.zFrom + (c.zTo - c.zFrom) * te;
-        const ox = W * 0.045 * te * c.pxD, oy = H * 0.03 * te * c.pyD;
-
-        ctx.clearRect(0, 0, W, H);
-
-        // ① Product image (Ken Burns)
-        ctx.save();
-        ctx.translate(W/2 + ox, H/2 + oy);
-        ctx.scale(zoom, zoom);
-        ctx.drawImage(img, -iW/2, -iH/2, iW, iH);
-        ctx.restore();
-
-        // ② Brand tint
-        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},0.13)`;
-        ctx.fillRect(0, 0, W, H);
-
-        // ③ Bottom gradient
-        const g = ctx.createLinearGradient(0, H*0.45, 0, H);
-        g.addColorStop(0, 'rgba(0,0,0,0)');
-        g.addColorStop(1, 'rgba(0,0,0,0.76)');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, W, H);
-
-        // ④ Vignette
-        const v = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.18, W/2,H/2,Math.min(W,H)*0.88);
-        v.addColorStop(0, 'rgba(0,0,0,0)');
-        v.addColorStop(1, 'rgba(0,0,0,0.38)');
-        ctx.fillStyle = v;
-        ctx.fillRect(0, 0, W, H);
-
-        // ⑤ Text fade-in after 55%
-        if (t > 0.55) {
-          const a = Math.min((t - 0.55) / 0.28, 1);
-          ctx.save();
-          ctx.globalAlpha = a;
-          const fs = Math.round(W * 0.063);
-          ctx.font = `bold ${fs}px Cairo,Arial,sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.shadowColor = 'rgba(0,0,0,0.95)';
-          ctx.shadowBlur = 14;
-          ctx.fillStyle = '#fff';
-
-          // word-wrap
-          const maxC = Math.floor(W / (fs * 0.58));
-          const words = adText.split(' ');
-          const lines = [];
-          let ln = '';
-          for (const w of words) {
-            if ((ln+w).length > maxC && ln) { lines.push(ln.trim()); ln = ''; }
-            ln += w + ' ';
-          }
-          if (ln.trim()) lines.push(ln.trim());
-          const lh = fs * 1.38, total = Math.min(lines.length,2) * lh;
-          lines.slice(0,2).forEach((l,i) => ctx.fillText(l, W/2, H*0.83 - total/2 + i*lh));
-          ctx.restore();
-        }
-
-        if (t < 1) requestAnimationFrame(frame);
-        else setTimeout(() => rec.stop(), 180);
-      }
-
-      rec.start(100);
-      requestAnimationFrame(frame);
-    });
-  }
-  // ── End Canvas Generator ────────────────────────────────────────
-
   // Generate
   document.getElementById('generateBtn').addEventListener('click', async () => {
     const adText = document.getElementById('adText').value.trim();
@@ -457,42 +340,66 @@
     btn.textContent = '⏳ جاري التوليد...';
     document.getElementById('resultWrap').style.display = 'none';
 
-    const progressInterval = startProgress();
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    document.getElementById('progressWrap').style.display = 'block';
+    progressFill.style.width = '5%';
+    progressText.textContent = 'جاري إرسال الطلب...';
+
     let videoUrl = '';
+    let fakeProgress = 5;
+
+    // شريط تقدم وهمي يزحف ببطء حتى ينتهي الفيديو
+    const fakeBar = setInterval(() => {
+      if (fakeProgress < 88) { fakeProgress += 1.2; progressFill.style.width = fakeProgress + '%'; }
+    }, 2500);
+
+    const msgs = ['إرسال الطلب إلى Veo 3.1 4K...','تحليل الصورة بالذكاء الاصطناعي...','Google Veo 3.1 يعمل...','جودة 4K تحتاج وقتاً أطول...','اكتمال قريباً...'];
+    let mi = 0;
+    const msgRotate = setInterval(() => { if (mi < msgs.length) progressText.textContent = msgs[mi++]; }, 15000);
 
     try {
-      if (selectedFiles.length > 0) {
-        // ── مسار A: صورة موجودة → توليد محلي بـ Canvas (مضمون 100%) ──
-        document.getElementById('progressText').textContent = 'تحليل الصورة وتوليد الفيديو...';
-        const blob = await canvasVideo(selectedFiles[0], adType, videoSize, adText);
-
-        // رفع الفيديو المولَّد إلى Supabase Storage
-        document.getElementById('progressText').textContent = 'جاري الرفع...';
-        const vidPath = `${user.id}/videos/vid_${Date.now()}.webm`;
-        const { error: vidErr } = await supabase.storage.from('ad-images')
-          .upload(vidPath, blob, { contentType: 'video/webm' });
-        if (vidErr) throw new Error('فشل رفع الفيديو');
-
-        const { data: vidUrl } = supabase.storage.from('ad-images').getPublicUrl(vidPath);
-        videoUrl = vidUrl.publicUrl;
-
-      } else {
-        // ── مسار B: بدون صورة → kie.ai text-to-video ──
-        const prompt = buildPrompt(adText, adType, platform, videoSize);
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-video`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-          body: JSON.stringify({ prompt, imageUrls: [], adType, platform, videoSize })
-        });
-        if (!res.ok) throw new Error('فشل التوليد');
-        const result = await res.json();
-        if (result.error) throw new Error(result.error);
-        videoUrl = result.video_url;
+      // 1. رفع الصورة إن وجدت
+      const imageUrls = [];
+      for (const file of selectedFiles) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `${user.id}/${Date.now()}_${safeName}`;
+        const { error: upErr } = await supabase.storage.from('ad-images').upload(path, file);
+        if (!upErr) {
+          const { data: urlData } = supabase.storage.from('ad-images').getPublicUrl(path);
+          imageUrls.push(urlData.publicUrl);
+        }
       }
 
-      clearInterval(progressInterval);
-      document.getElementById('progressFill').style.width = '100%';
-      document.getElementById('progressText').textContent = 'اكتمل!';
+      // 2. إرسال طلب التوليد → يرجع taskId فوراً
+      const genRes = await fetch(`${SUPABASE_URL}/functions/v1/generate-video`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ prompt: adText, imageUrls, adType, platform, videoSize })
+      });
+      const genData = await genRes.json();
+      if (genData.error) throw new Error(genData.error);
+      const taskId = genData.taskId;
+
+      // 3. Polling في المتصفح — كل 8 ثوانٍ، أقصى 5 دقائق
+      progressText.textContent = 'Google Veo 3.1 يعمل على الفيديو...';
+      for (let i = 0; i < 38; i++) {
+        await new Promise(r => setTimeout(r, 8000));
+        const chkRes = await fetch(`${SUPABASE_URL}/functions/v1/check-video`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({ taskId })
+        });
+        const chk = await chkRes.json();
+        if (chk.error) throw new Error(chk.error);
+        if (chk.done) { videoUrl = chk.video_url; break; }
+      }
+      if (!videoUrl) throw new Error('انتهت المهلة — حاول مجدداً');
+
+      clearInterval(fakeBar);
+      clearInterval(msgRotate);
+      progressFill.style.width = '100%';
+      progressText.textContent = 'اكتمل!';
 
       // حفظ في السجل
       await supabase.from('video_history').insert({
@@ -512,13 +419,13 @@
         const dlBtn = document.getElementById('downloadBtn');
         video.src = videoUrl;
         dlBtn.href = videoUrl;
-        dlBtn.download = `ad_${Date.now()}.webm`;
         resultWrap.style.display = 'block';
         loadHistory();
       }, 400);
 
     } catch (err) {
-      clearInterval(progressInterval);
+      clearInterval(fakeBar);
+      clearInterval(msgRotate);
       document.getElementById('progressWrap').style.display = 'none';
       msgEl.className = 'msg error'; msgEl.style.display = 'block';
       msgEl.textContent = 'حدث خطأ أثناء التوليد، حاول مرة أخرى';
